@@ -1,0 +1,11 @@
+{
+    "asset": "8d5ca9717770d184aac25b8fcb8190af",
+    "fileName": "019ae946-1d94-7285-bd72-89ab0fcf093e.pose.json",
+    "prompt": "one sword block",
+    "negativePrompt": "",
+    "model": "9e46c009-67d8-4254-a3a0-32e3168247ee",
+    "modelName": "Text to Motion",
+    "customSeed": 1672863991,
+    "w3CTraceId": "e2137108690175b01335a67513b619b6",
+    "isTrimmed": false
+}

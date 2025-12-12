@@ -1,0 +1,11 @@
+{
+    "asset": "2576d057d7096964a9bb4f6db3b38a4e",
+    "fileName": "019ae95e-7645-7f93-bb21-9ec275b0fdc2.pose.json",
+    "prompt": "Roll knight",
+    "negativePrompt": "",
+    "model": "9e46c009-67d8-4254-a3a0-32e3168247ee",
+    "modelName": "Text to Motion",
+    "customSeed": 2133227787,
+    "w3CTraceId": "eeab783b03db4a10b48ab199b62a1db2",
+    "isTrimmed": false
+}

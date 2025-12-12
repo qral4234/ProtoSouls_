@@ -1,0 +1,11 @@
+{
+    "asset": "7cefb9de6f224354a88d4a7573464447",
+    "fileName": "019ae95d-013b-7ef4-9e04-e8ba138c7207.pose.json",
+    "prompt": "A heavy armored dark knight holding a massive two-handed greatsword. The character performs a defensive block by raising the sword horizontally or diagonally in front of their body to deflect an incoming attack. The stance is grounded and powerful, absorbing the impact with the weight of the sword. Realistic, heavy animation suitable for a souls-like action RPG. No shield, only sword blocking.",
+    "negativePrompt": "",
+    "model": "9e46c009-67d8-4254-a3a0-32e3168247ee",
+    "modelName": "Text to Motion",
+    "customSeed": 181479418,
+    "w3CTraceId": "76f4d22c9c00b78d033e179db5934ed6",
+    "isTrimmed": false
+}

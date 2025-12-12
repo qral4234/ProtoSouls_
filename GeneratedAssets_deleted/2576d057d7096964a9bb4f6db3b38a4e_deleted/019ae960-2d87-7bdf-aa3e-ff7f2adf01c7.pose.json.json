@@ -1,0 +1,11 @@
+{
+    "asset": "2576d057d7096964a9bb4f6db3b38a4e",
+    "fileName": "019ae960-2d87-7bdf-aa3e-ff7f2adf01c7.pose.json",
+    "prompt": "jump knight",
+    "negativePrompt": "",
+    "model": "9e46c009-67d8-4254-a3a0-32e3168247ee",
+    "modelName": "Text to Motion",
+    "customSeed": 760765861,
+    "w3CTraceId": "2ced7a99410d05a3e31f3538fd30dad6",
+    "isTrimmed": false
+}
