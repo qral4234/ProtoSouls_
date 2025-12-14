@@ -19,9 +19,9 @@ public class EnemyStats : CharacterStats
         // Optionally set Enemy specific health here
     }
 
-    public override void TakeDamage(int damage, string damageAnimation = "Damage")
+    public override void TakeDamage(int damage, string damageAnimation = "Damage", Transform damageSource = null)
     {
-        base.TakeDamage(damage, damageAnimation);
+        base.TakeDamage(damage, damageAnimation, damageSource);
 
         if (animator != null)
         {

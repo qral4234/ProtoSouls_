@@ -87,8 +87,12 @@ public class EnemyManager : MonoBehaviour
             else
             {
                 navMeshAgent.enabled = true;
-                navMeshAgent.SetDestination(currentTarget.position);
-                animator.SetFloat("Vertical", 1, 0.1f, Time.deltaTime);
+
+                if (navMeshAgent.isActiveAndEnabled)
+                {
+                    navMeshAgent.SetDestination(currentTarget.position);
+                    animator.SetFloat("Vertical", 1, 0.1f, Time.deltaTime);
+                }
             }
         }
         else

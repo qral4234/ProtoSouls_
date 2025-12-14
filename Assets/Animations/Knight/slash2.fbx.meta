@@ -35,7 +35,7 @@ ModelImporter:
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 15
-      lastFrame: 100
+      lastFrame: 70
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -64,6 +64,13 @@ ModelImporter:
         messageOptions: 0
       - time: 0.6735751
         functionName: CloseDamageCollider
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.796875
+        functionName: EnableCombo
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

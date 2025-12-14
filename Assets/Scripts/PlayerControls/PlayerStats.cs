@@ -18,6 +18,9 @@ public class PlayerStats : CharacterStats
     PlayerManager playerManager;
     AnimatorHandler animatorHandler;
 
+    [Header("Knockback Settings")]
+    public float knockbackForce = 25f; // Increased default for visibility
+
     public override void Start()
     {
         base.Start();
@@ -36,7 +39,7 @@ public class PlayerStats : CharacterStats
         }
     }
 
-    public override void TakeDamage(int damage, string damageAnimation = "Damage")
+    public override void TakeDamage(int damage, string damageAnimation = "Damage", Transform damageSource = null)
     {
         if (playerManager.isBlocking && currentStamina > 0)
         {
@@ -55,6 +58,19 @@ public class PlayerStats : CharacterStats
         }
 
         animatorHandler.PlayTargetAnimation(damageAnimation, true);
+
+        // KNOCKBACK LOGIC
+        if (damageSource != null)
+        {
+            PlayerLocomotion locomotion = GetComponent<PlayerLocomotion>();
+            if (locomotion != null)
+            {
+                // Direction: From Enemy -> To Player
+                // If Enemy is at 0,0 and Player is at 0,2. Direction is (0,0,2) = Forward.
+                Vector3 knockbackDir = transform.position - damageSource.position;
+                locomotion.ApplyKnockback(knockbackDir, knockbackForce);
+            }
+        }
 
         if (currentHealth <= 0)
         {
@@ -77,7 +93,6 @@ public class PlayerStats : CharacterStats
     {
         if (currentStamina < maxStamina)
         {
-            // Check if we have waited long enough to start regen
             if (staminaRegenTimer > staminaRegenDelay)
             {
                 currentStamina += staminaRegenAmount * regenMultiplier * Time.deltaTime;
@@ -126,7 +141,6 @@ public class PlayerStats : CharacterStats
 
         animatorHandler.PlayTargetAnimation("Death", true);
 
-        // Disable physics to prevent pushing/interactions
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {

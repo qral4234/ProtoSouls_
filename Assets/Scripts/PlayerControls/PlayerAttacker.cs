@@ -4,6 +4,7 @@ public class PlayerAttacker : MonoBehaviour
 {
     AnimatorHandler animatorHandler;
     DamageCollider damageCollider;
+    public string lastAttack;
 
     public void Awake()
     {
@@ -29,7 +30,11 @@ public class PlayerAttacker : MonoBehaviour
 
     public void HandleLightAttack(WeaponItem weapon)
     {
+        PlayerRageManager rageManager = GetComponent<PlayerRageManager>();
+        if (rageManager != null) rageManager.DrainRage(rageManager.attackDrainAmount);
+
         animatorHandler.PlayTargetAnimation(weapon.OH_Light_Attack_1, true);
+        lastAttack = weapon.OH_Light_Attack_1;
     }
 
     public void HandleCombo(WeaponItem weapon)
@@ -37,9 +42,18 @@ public class PlayerAttacker : MonoBehaviour
         if (animatorHandler.canDoCombo)
         {
             animatorHandler.canDoCombo = false;
-            if (animatorHandler.anim.GetCurrentAnimatorStateInfo(0).IsName(weapon.OH_Light_Attack_1))
+            
+            PlayerRageManager rageManager = GetComponent<PlayerRageManager>();
+            if (rageManager != null) rageManager.DrainRage(rageManager.attackDrainAmount);
+            if (lastAttack == weapon.OH_Light_Attack_1)
             {
                 animatorHandler.PlayTargetAnimation(weapon.OH_Light_Attack_2, true);
+                lastAttack = weapon.OH_Light_Attack_2;
+            }
+            else if (lastAttack == weapon.OH_Light_Attack_2)
+            {
+                animatorHandler.PlayTargetAnimation(weapon.OH_Light_Attack_3, true);
+                lastAttack = weapon.OH_Light_Attack_3;
             }
         }
     }

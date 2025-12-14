@@ -34,8 +34,7 @@ public class PlayerLocomotion : MonoBehaviour
         cameraObject = Camera.main.transform;
 
         isGrounded = true;
-        // Default ground layer to "Default" (1) if not set, usually safest to let user set it in inspector
-        // But for code safety let's assume everything except player
+
         if (groundLayer == 0)
         {
             groundLayer = 1; 
@@ -119,6 +118,13 @@ public class PlayerLocomotion : MonoBehaviour
         {
             speed = sprintSpeed;
         }
+
+        // RAGE MODE INTEGRATION
+        PlayerRageManager rageManager = GetComponent<PlayerRageManager>();
+        if (rageManager != null && rageManager.isRageActive)
+        {
+            speed *= 1.3f;
+        }
         moveDirection *= speed;
 
         Vector3 movementVelocity = moveDirection;
@@ -191,5 +197,17 @@ public class PlayerLocomotion : MonoBehaviour
                 animatorHandler.PlayTargetAnimation("Land", true);
             }
         }
+    }
+
+    public void ApplyKnockback(Vector3 direction, float force)
+    {
+        direction.Normalize();
+        direction.y = 0; // Keep it purely horizontal
+        
+        // Safety: If inside, push backwards relative to self
+        if (direction == Vector3.zero)
+            direction = -transform.forward;
+
+        playerRigidbody.AddForce(direction * force, ForceMode.Impulse);
     }
 }
