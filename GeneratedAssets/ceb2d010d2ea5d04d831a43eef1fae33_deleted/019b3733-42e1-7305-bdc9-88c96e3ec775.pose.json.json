@@ -1,0 +1,11 @@
+{
+    "asset": "ceb2d010d2ea5d04d831a43eef1fae33",
+    "fileName": "019b3733-42e1-7305-bdc9-88c96e3ec775.pose.json",
+    "prompt": "A heavy, powerful creature takes a strong impact to the chest. The upper body staggers violently backward, causing the character to hunch forward. Its massive, heavy arms flail outwards and downwards due to their weight. The creature takes a clumsy, heavy step back with one foot to regain balance before recovering into a balanced fighting stance. The movement feels heavy and resistant.",
+    "negativePrompt": "",
+    "model": "9e46c009-67d8-4254-a3a0-32e3168247ee",
+    "modelName": "Text to Motion",
+    "customSeed": 566242005,
+    "w3CTraceId": "299b4c826b2bfe5a191d5ff51ddbb16b",
+    "isTrimmed": false
+}

@@ -6,7 +6,8 @@ public class DamageCollider : MonoBehaviour
     Collider damageCollider;
     public int currentWeaponDamage = 25;
     public string currentHitAnimation = "Damage";
-    public float knockbackForce = 15f;
+    public float poiseBreakPower = 10f;
+    public float knockbackForce = 20f;
     List<CharacterStats> charactersDamagedDuringThisSwing = new List<CharacterStats>();
 
     private void Awake()
@@ -60,15 +61,7 @@ public class DamageCollider : MonoBehaviour
                 CharacterStats attackerStats = GetComponentInParent<CharacterStats>();
                 Transform attackerTransform = (attackerStats != null) ? attackerStats.transform : transform;
 
-                characterStats.TakeDamage(finalDamage, currentHitAnimation, attackerTransform);
-
-                // KNOCKBACK LOGIC
-                EnemyLocomotionManager enemyLocomotion = collision.GetComponent<EnemyLocomotionManager>();
-                if (enemyLocomotion != null)
-                {
-                    Vector3 knockbackDir = collision.transform.position - attackerTransform.position;
-                    enemyLocomotion.ApplyKnockback(knockbackDir, knockbackForce);
-                }
+                characterStats.TakeDamage(finalDamage, poiseBreakPower, knockbackForce, currentHitAnimation, attackerTransform);
             }
         }
     }

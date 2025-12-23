@@ -2,16 +2,38 @@ using UnityEngine;
 
 public class InputHandler : MonoBehaviour
 {
+    [Header("Hareket Girdileri")]
+    [Tooltip("Yatay eksen girdisi (A/D veya Sol Analog).")]
     public float horizontal;
+    [Tooltip("Dikey eksen girdisi (W/S veya Sol Analog).")]
     public float vertical;
+    [Tooltip("Toplam hareket miktarı (0 ile 1 arası).")]
     public float moveAmount;
+    
+    [Header("Kamera Girdileri")]
+    [Tooltip("Fare X ekseni (Sağ/Sol bakış).")]
     public float mouseX;
+    [Tooltip("Fare Y ekseni (Yukarı/Aşağı bakış).")]
     public float mouseY;
+    
+    [Header("Aksiyon Girdileri")]
+    [Tooltip("Sprint/Yuvarlanma tuşuna basılıyor mu? (Genellikle Shift veya B).")]
     public bool b_Input;
+    [Tooltip("Hafif saldırı tuşuna basıldı mı? (Sol Tık).")]
     public bool rb_Input;
+    [Tooltip("Bloklama tuşuna basılıyor mu? (Sağ Tık).")]
     public bool blockingInput;
+    
+    [Header("Durum İşaretçileri (Flags)")]
+    [Tooltip("Yuvarlanma tetiklendi.")]
     public bool rollFlag;
+    [Tooltip("Koşma tetiklendi.")]
     public bool sprintFlag;
+    [Tooltip("Kilitlenme tuşuna basıldı (Orta Fare).")]
+    public bool lockOn_Input;
+    
+    [Header("Zamanlayıcılar")]
+    [Tooltip("Yuvarlanma ile koşma arasındaki farkı anlamak için zamanlayıcı.")]
     public float rollInputTimer;
 
     PlayerControls inputActions;
@@ -57,15 +79,18 @@ public class InputHandler : MonoBehaviour
 
     public void TickInput(float delta)
     {
+        // Hareketi oku ve işle
         moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
         mouseX = Input.GetAxis("Mouse X");
         mouseY = Input.GetAxis("Mouse Y");
 
+        // Sprint ve Roll (Shift) mantığı
         b_Input = Input.GetKey(KeyCode.LeftShift);
 
         if (b_Input)
         {
             rollInputTimer += delta;
+            // Tuşa basılı tutuluyorsa koşma moduna geç
             if (rollInputTimer > 0.22f)
             {
                 sprintFlag = true;
@@ -79,6 +104,7 @@ public class InputHandler : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
+            // Eğer kısa basılıp çekildiyse yuvarlan
             if (rollInputTimer < 0.22f)
             {
                 sprintFlag = false;
@@ -88,7 +114,9 @@ public class InputHandler : MonoBehaviour
             rollInputTimer = 0;
         }
 
+        // Saldırı ve Blok girdileri
         rb_Input = Input.GetMouseButtonDown(0);
         blockingInput = Input.GetMouseButton(1);
+        lockOn_Input = Input.GetMouseButtonDown(2); // Orta tuş ile kilitlenme
     }
 }

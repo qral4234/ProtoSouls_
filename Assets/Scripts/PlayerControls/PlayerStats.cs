@@ -39,7 +39,7 @@ public class PlayerStats : CharacterStats
         }
     }
 
-    public override void TakeDamage(int damage, string damageAnimation = "Damage", Transform damageSource = null)
+    public override void TakeDamage(int damage, float poiseDamage, float attackerKnockbackForce, string damageAnimation = "Damage", Transform damageSource = null)
     {
         if (playerManager.isBlocking && currentStamina > 0)
         {
@@ -68,7 +68,7 @@ public class PlayerStats : CharacterStats
                 // Direction: From Enemy -> To Player
                 // If Enemy is at 0,0 and Player is at 0,2. Direction is (0,0,2) = Forward.
                 Vector3 knockbackDir = transform.position - damageSource.position;
-                locomotion.ApplyKnockback(knockbackDir, knockbackForce);
+                locomotion.ApplyKnockback(knockbackDir, attackerKnockbackForce);
             }
         }
 

@@ -1,0 +1,11 @@
+{
+    "asset": "ceb2d010d2ea5d04d831a43eef1fae33",
+    "fileName": "019b2eba-8c7e-79b9-a957-4f81317f5112.pose.json",
+    "prompt": "get hit golem",
+    "negativePrompt": "",
+    "model": "9e46c009-67d8-4254-a3a0-32e3168247ee",
+    "modelName": "Text to Motion",
+    "customSeed": 523231317,
+    "w3CTraceId": "a6eeb99d116f7b6820adc5490fda26dc",
+    "isTrimmed": false
+}

@@ -8,11 +8,16 @@ public class PlayerManager : MonoBehaviour
     PlayerStats playerStats;
     PlayerAttacker playerAttacker;
 
+    [Header("Oyuncu Durumları")]
+    [Tooltip("Karakter şu an bir animasyon etkileşiminde mi? (Saldırı, Yuvarlanma vb.)")]
     public bool isInteracting;
+    [Tooltip("Karakter blok modunda mı?")]
     public bool isBlocking;
+    [Tooltip("Karakter öldü mü?")]
     public bool isDead;
 
-    [Header("Current Weapon")]
+    [Header("Ekipman")]
+    [Tooltip("Şu an kullanılan silah.")]
     public WeaponItem currentWeapon; 
 
     void Awake()
@@ -33,9 +38,10 @@ public class PlayerManager : MonoBehaviour
 
         isInteracting = animatorHandler.anim.GetBool("isInteracting");
 
+        // Girdileri dinle
         inputHandler.TickInput(delta);
 
-        // Blocking Logic
+        // Bloklama Mantığı
         if (inputHandler.blockingInput && !isInteracting) 
         {
             isBlocking = true;
@@ -46,17 +52,17 @@ public class PlayerManager : MonoBehaviour
         }
         animatorHandler.anim.SetBool("isBlocking", isBlocking);
 
-        // Stamina Regen Multiplier Check
+        // Stamina (Dayanıklılık) Yenilenme Hızı Kontrolü
         if (inputHandler.moveAmount > 0 && !inputHandler.sprintFlag)
         {
-            playerStats.SetRegenMultiplier(2.0f);
+            playerStats.SetRegenMultiplier(2.0f); // Hareket ederken daha yavaş dolsun (örnek)
         }
         else
         {
             playerStats.SetRegenMultiplier(1.0f);
         }
 
-        // Sprinting Logic
+        // Koşma (Sprint) Mantığı
         if (inputHandler.sprintFlag)
         {
             if (isInteracting)
@@ -72,7 +78,7 @@ public class PlayerManager : MonoBehaviour
             }
         }
 
-        // Rolling Logic
+        // Yuvarlanma (Roll) Mantığı
         if (inputHandler.rollFlag)
         {
             if (isInteracting)
@@ -90,7 +96,7 @@ public class PlayerManager : MonoBehaviour
 
         playerLocomotion.HandleRollingAndSprinting(delta);
 
-        // Attacking Logic
+        // Saldırı Mantığı
         if (inputHandler.rb_Input)
         {
             if (playerStats.currentStamina > 0)
@@ -113,13 +119,15 @@ public class PlayerManager : MonoBehaviour
             inputHandler.rb_Input = false;
         }
 
+        // Animasyon Değerlerini Güncelle
         float moveAmount = inputHandler.moveAmount;
         if (playerLocomotion.isSprinting)
         {
-            moveAmount = 2;
+            moveAmount = 2; // Koşma animasyonu için
         }
 
-        animatorHandler.UpdateAnimatorValues(moveAmount);
+        bool isLockedOn = CameraHandler.singleton.currentLockOnTarget != null;
+        animatorHandler.UpdateAnimatorValues(moveAmount, inputHandler.horizontal, inputHandler.vertical, isLockedOn);
     }
 
     void FixedUpdate()
@@ -138,6 +146,7 @@ public class PlayerManager : MonoBehaviour
 
         if (CameraHandler.singleton != null)
         {
+            CameraHandler.singleton.HandleLockOn();
             CameraHandler.singleton.FollowTarget(delta);
             CameraHandler.singleton.HandleCameraRotation(delta, inputHandler.mouseX, inputHandler.mouseY);
             CameraHandler.singleton.HandleCameraCollisions(delta);
