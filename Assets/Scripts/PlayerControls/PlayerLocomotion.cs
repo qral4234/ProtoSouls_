@@ -16,6 +16,9 @@ public class PlayerLocomotion : MonoBehaviour
     [Tooltip("Karakterin dönme hızı.")]
     public float rotationSpeed = 10;
 
+    [Tooltip("Yuvarlanma sırasında karaktere uygulanan anlık fırlatma gücü.")]
+    public float rollingVelocity = 25f; 
+
     [Header("Düşme ve İniş Ayarları")]
     [Tooltip("Karakterin havada kaldığı süre.")]
     public float inAirTimer;
@@ -55,10 +58,14 @@ public class PlayerLocomotion : MonoBehaviour
     public void HandleRollingAndSprinting(float delta)
     {
         if (animatorHandler.anim.GetBool("isInteracting"))
+        {
+            // FIX: Eğer animasyon sırasındaysak ve tuşa basıldıysa, o girdiyi yut (iptal et).
+            // Yoksa animasyon bitince "takılı kalmış" gibi tekrar takla atar.
+            inputHandler.rollFlag = false; 
             return;
+        }
 
         // --- YUVARLANMA (ROLL) MANTIĞI ---
-        // Yuvarlanma her zaman çalışır (Kilitli olup olmaması fark etmez)
         if (inputHandler.rollFlag)
         {
             moveDirection = cameraObject.forward * inputHandler.vertical;
@@ -66,27 +73,46 @@ public class PlayerLocomotion : MonoBehaviour
 
             if (inputHandler.moveAmount > 0)
             {
-                // Hareket ederken yuvarlanma
                 animatorHandler.PlayTargetAnimation("Rolling", true);
                 moveDirection.y = 0;
+                
+                // Hangi modda olursak olalım (Lock-On dahil), karakter hareket ettiği yöne dönsün.
+                // Böylece S'ye basınca arkasını dönüp kaçar (İleri takla animasyonuyla).
                 Quaternion rollRotation = Quaternion.LookRotation(moveDirection);
                 transform.rotation = rollRotation;
+                
+                playerRigidbody.AddForce(moveDirection.normalized * rollingVelocity, ForceMode.Impulse);
             }
             else
             {
-                // Yerinde yuvarlanma (Geriye kaçış)
-                animatorHandler.PlayTargetAnimation("Rolling", true);
+                // HİÇBİR YERE BASILMIYORSA (Olduğu yerde Shift)
+                
+                // Karakteri tam arkaya döndür (180 derece)
+                transform.rotation = Quaternion.LookRotation(-transform.forward);
+                
+                // Şimdi öne doğru (yani eskiden arka olan tarafa) takla at
+                animatorHandler.PlayTargetAnimation("Rolling", true); 
+                
+                // Kuvveti yeni baktığı yöne (uzaklaşacak şekilde) uygula
+                playerRigidbody.AddForce(transform.forward * rollingVelocity, ForceMode.Impulse);
             }
             
             inputHandler.rollFlag = false;
         }
 
         // --- KİLİTLENME (LOCK-ON) KONTROLÜ ---
-        // Eğer bir hedefe kilitlenmişsek, karakterin koşmasını (sprint) engelle.
         if (CameraHandler.singleton.currentLockOnTarget != null)
         {
-            isSprinting = false;
-            return;
+            // Sadece ileri (W) basılıysa koşmaya izin ver
+            if (inputHandler.vertical > 0f)
+            {
+                 // Devam et, aşağıdaki kod isSprinting'i açacak
+            }
+            else
+            {
+                isSprinting = false;
+                return;
+            }
         }
 
         // --- KOŞMA (SPRINT) MANTIĞI ---

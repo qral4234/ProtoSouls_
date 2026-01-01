@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI; // Text için gerekli
 
 public class PlayerStats : CharacterStats
 {
@@ -18,14 +19,26 @@ public class PlayerStats : CharacterStats
     PlayerManager playerManager;
     AnimatorHandler animatorHandler;
 
+    [Header("Heal Settings")]
+    public int healCount = 3; 
+    public int healAmount = 50; 
+    public HealingVisuals healingVisuals; 
+    public Text potionCountText; // Eklendi: Ekranda kaç şişe kaldığını yazacak
+
     [Header("Knockback Settings")]
-    public float knockbackForce = 25f; // Increased default for visibility
+    public float knockbackForce = 25f; 
 
     public override void Start()
     {
         base.Start();
         playerManager = GetComponent<PlayerManager>();
         animatorHandler = GetComponentInChildren<AnimatorHandler>();
+        
+        healingVisuals = GetComponent<HealingVisuals>();
+        if (healingVisuals == null)
+        {
+            healingVisuals = gameObject.AddComponent<HealingVisuals>();
+        }
 
         if (healthBar != null)
         {
@@ -37,6 +50,48 @@ public class PlayerStats : CharacterStats
         {
             staminaBar.SetMaxStamina(maxStamina);
         }
+
+        // Başlangıçta UI'ı güncelle
+        if(potionCountText != null)
+        {
+            potionCountText.text = healCount.ToString();
+        }
+    }
+
+    public void HealPlayer()
+    {
+        if (isDead) return;
+        if (healCount <= 0) return; 
+        if (currentHealth >= maxHealth) return; 
+
+        // 1. Canı Yenile
+        currentHealth += healAmount;
+        if (currentHealth > maxHealth) currentHealth = maxHealth;
+
+        // 2. Hakkı Azalt
+        healCount--;
+        Debug.Log("İyileşildi! Kalan Hak: " + healCount);
+        
+        // 3. UIText Güncelle (Eklendi)
+        if(potionCountText != null)
+        {
+             potionCountText.text = healCount.ToString();
+        }
+
+        // 4. Bar Güncelle
+        if (healthBar != null)
+        {
+            healthBar.SetCurrentHealth(currentHealth);
+        }
+
+        // 4. Görsel Efekti Oynat
+        if (healingVisuals != null)
+        {
+            healingVisuals.PlayHealingEffect(transform.position + Vector3.up * 1.0f); // Gövde hizasında çıksın
+        }
+
+        // 5. Animasyon (Opsiyonel - Şimdilik sadece efekt)
+        // animatorHandler.PlayTargetAnimation("Heal", true); 
     }
 
     public override void TakeDamage(int damage, float poiseDamage, float attackerKnockbackForce, string damageAnimation = "Damage", Transform damageSource = null)
@@ -133,6 +188,7 @@ public class PlayerStats : CharacterStats
     {
         currentHealth = 0;
         playerManager.isDead = true;
+        isDead = true; // Base class değişkenini güncelle
         
         if (healthBar != null)
         {

@@ -33,6 +33,7 @@ public class PlayerAttacker : MonoBehaviour
         PlayerRageManager rageManager = GetComponent<PlayerRageManager>();
         if (rageManager != null) rageManager.DrainRage(rageManager.attackDrainAmount);
 
+        // AutoTarget kaldırıldı
         animatorHandler.PlayTargetAnimation(weapon.OH_Light_Attack_1, true);
         lastAttack = weapon.OH_Light_Attack_1;
     }
@@ -45,6 +46,9 @@ public class PlayerAttacker : MonoBehaviour
             
             PlayerRageManager rageManager = GetComponent<PlayerRageManager>();
             if (rageManager != null) rageManager.DrainRage(rageManager.attackDrainAmount);
+            
+            // AutoTarget kaldırıldı
+
             if (lastAttack == weapon.OH_Light_Attack_1)
             {
                 animatorHandler.PlayTargetAnimation(weapon.OH_Light_Attack_2, true);

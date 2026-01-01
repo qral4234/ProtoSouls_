@@ -4,6 +4,7 @@ public class CharacterStats : MonoBehaviour
 {
     public int maxHealth = 100;
     public int currentHealth;
+    public bool isDead; // Base class'a taşıdık
 
     public float totalPoiseDefense = 30f;
     public float currentPoiseDefense;

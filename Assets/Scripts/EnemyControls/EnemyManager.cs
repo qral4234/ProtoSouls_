@@ -25,6 +25,13 @@ public class EnemyManager : MonoBehaviour
     {
         enemyStats = GetComponent<EnemyStats>();
         navMeshAgent = GetComponentInChildren<NavMeshAgent>();
+        
+        // Rotasyonu tekrar biz kontrol edelim (Düşman sağa sola dönmesin)
+        if(navMeshAgent != null)
+        {
+            navMeshAgent.updateRotation = false;
+        }
+
         animator = GetComponentInChildren<Animator>();
         
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -33,9 +40,6 @@ public class EnemyManager : MonoBehaviour
             currentTarget = player.transform;
             targetPlayerManager = player.GetComponent<PlayerManager>();
         }
-        
-        // Optionally find colliders if they are not assigned in inspector, but user implies public assignment.
-        // For now relying on Inspector assignment as per typical Unity workflow for "public" fields requested.
     }
 
     private void Update()
@@ -68,6 +72,7 @@ public class EnemyManager : MonoBehaviour
         if (currentTarget == null)
             return;
 
+        // Oyuncu öldüyse dur ve sevin
         if (targetPlayerManager != null && targetPlayerManager.isDead)
         {
              navMeshAgent.enabled = false;
@@ -78,6 +83,7 @@ public class EnemyManager : MonoBehaviour
 
         distanceFromTarget = Vector3.Distance(currentTarget.position, transform.position);
 
+        // --- HAREKET MANTIĞI ---
         if (distanceFromTarget > stoppingDistance)
         {
             if (isPreformingAction)
@@ -92,6 +98,9 @@ public class EnemyManager : MonoBehaviour
                 {
                     navMeshAgent.SetDestination(currentTarget.position);
                     animator.SetFloat("Vertical", 1, 0.1f, Time.deltaTime);
+                    
+                    // Yürürken de bize baksın
+                    RotateTowardsTarget();
                 }
             }
         }
@@ -113,27 +122,37 @@ public class EnemyManager : MonoBehaviour
         if (currentRecoveryTime > 0)
             return;
 
-        isPreformingAction = true;
-        currentRecoveryTime = 2.5f;
+        if (distanceFromTarget > attackRange)
+            return;
 
+        isPreformingAction = true;
+        
+        // Saldırı bekleme süresi (Hızlandırıldı: 1.5 - 3.0 saniye)
+        currentRecoveryTime = Random.Range(1.5f, 3.0f);
+
+        // --- SADECE YUMRUK SALDIRILARI ---
+        animator.SetBool("isJumpAttacking", false);
+        
         int randomAttack = Random.Range(0, 2);
         animator.SetInteger("AttackIndex", randomAttack);
         animator.SetTrigger("isAttacking");
-
-        if (randomAttack == 0)
-        {
-            rightHandDamageCollider.currentHitAnimation = "GetHit_01";
-            leftHandDamageCollider.currentHitAnimation = "GetHit_01";
+        
+        if (randomAttack == 0) 
+        { 
+            rightHandDamageCollider.currentHitAnimation = "GetHit_01"; 
+            leftHandDamageCollider.currentHitAnimation = "GetHit_01"; 
         }
-        else if (randomAttack == 1)
-        {
-            rightHandDamageCollider.currentHitAnimation = "GetHit_02";
-            leftHandDamageCollider.currentHitAnimation = "GetHit_02";
+        else if (randomAttack == 1) 
+        { 
+            rightHandDamageCollider.currentHitAnimation = "GetHit_02"; 
+            leftHandDamageCollider.currentHitAnimation = "GetHit_02"; 
         }
     }
 
     private void RotateTowardsTarget()
     {
+        if (isPreformingAction) return;
+
         Vector3 direction = currentTarget.position - transform.position;
         direction.y = 0;
         
@@ -157,7 +176,6 @@ public class EnemyManager : MonoBehaviour
 
     public void OpenLeftDamageCollider()
     {
-        Debug.Log("SOL EL AÇILDI!"); 
         leftHandDamageCollider.EnableDamageCollider();
     }
 

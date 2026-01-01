@@ -96,6 +96,13 @@ public class PlayerManager : MonoBehaviour
 
         playerLocomotion.HandleRollingAndSprinting(delta);
 
+        // --- HEALING INPUT ---
+        if (inputHandler.heal_Input)
+        {
+            inputHandler.heal_Input = false; 
+            playerStats.HealPlayer();
+        }
+
         // Saldırı Mantığı
         if (inputHandler.rb_Input)
         {

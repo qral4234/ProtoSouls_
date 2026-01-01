@@ -23,6 +23,8 @@ public class InputHandler : MonoBehaviour
     public bool rb_Input;
     [Tooltip("Bloklama tuşuna basılıyor mu? (Sağ Tık).")]
     public bool blockingInput;
+    [Tooltip("İyileşme tuşuna basıldı mı? (Q).")]
+    public bool heal_Input;
     
     [Header("Durum İşaretçileri (Flags)")]
     [Tooltip("Yuvarlanma tetiklendi.")]
@@ -117,6 +119,9 @@ public class InputHandler : MonoBehaviour
         // Saldırı ve Blok girdileri
         rb_Input = Input.GetMouseButtonDown(0);
         blockingInput = Input.GetMouseButton(1);
-        lockOn_Input = Input.GetMouseButtonDown(2); // Orta tuş ile kilitlenme
+        lockOn_Input = Input.GetMouseButtonDown(2); // Lock-On GERİ GELDİ
+        
+        // İYİLEŞTİRME GİRDİSİ (Q Tuşu)
+        heal_Input = Input.GetKeyDown(KeyCode.Q);
     }
 }

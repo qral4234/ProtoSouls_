@@ -135,6 +135,8 @@ public class CameraHandler : MonoBehaviour
         else
         {
             // Kilitlenme (Locked-On) Kamera Modu
+            float distanceFromTarget = Vector3.Distance(targetTransform.position, currentLockOnTarget.position);
+
             Vector3 rotation = Vector3.zero;
             Vector3 dir = currentLockOnTarget.position - myTransform.position;
             dir.Normalize();
@@ -143,8 +145,13 @@ public class CameraHandler : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(dir);
             myTransform.rotation = Quaternion.Slerp(myTransform.rotation, targetRotation, delta * 9);
 
-            // Yakın Mesafe Mantığı (Offset ile hedefe bakma)
-            Vector3 lockOnOffset = new Vector3(0, 1.4f, 0); // Göğüs hizasına odaklan
+            // --- REVIZE: Dinamik Hedef Noktası ---
+            // Mesafe kısaldıkça, bakılan noktayı aşağı çekiyoruz (Kafa'dan Gövdeye)
+            // Bu sayede dibine girince kamera havaya bakmaya çalışmaz (Tepeye çıkıp inme sorunu çözülür)
+            float t = Mathf.Clamp01(distanceFromTarget / 3.0f); // 0 ile 3 metre arası interpolasyon
+            float dynamicHeight = Mathf.Lerp(0.5f, 1.4f, t); // Dibindeyken 0.5f (Bel), Uzaktayken 1.4f (Omuz/Baş)
+
+            Vector3 lockOnOffset = new Vector3(0, dynamicHeight, 0); 
             dir = (currentLockOnTarget.position + lockOnOffset) - cameraPivotTransform.position;
             dir.Normalize();
 
@@ -152,20 +159,33 @@ public class CameraHandler : MonoBehaviour
             Vector3 euler = targetRotation.eulerAngles;
             euler.y = 0;
             
-            // Dikey açı (Pitch) sınırlaması: -30 ile 40 derece arası
+            // Dikey açı (Pitch) sınırlaması
             if (euler.x > 180) euler.x -= 360; 
-            euler.x = Mathf.Clamp(euler.x, -30, 40);
+            // FIX: Maksimum yukarı bakma açısını 40'tan 20'ye indirdim.
+            // Ayrıca minimum açıyı da sınırladım.
+            euler.x = Mathf.Clamp(euler.x, -20, 25);
 
-            cameraPivotTransform.localEulerAngles = euler;
+            // Yumuşak geçiş
+            Vector3 currentEuler = cameraPivotTransform.localEulerAngles;
+            if (currentEuler.x > 180) currentEuler.x -= 360;
+            float smoothX = Mathf.Lerp(currentEuler.x, euler.x, delta * 9);
+            cameraPivotTransform.localEulerAngles = new Vector3(smoothX, 0, 0);
 
-            // Yükseklik sınırlaması (Kameranın çok yukarı kalkmasını önle)
+            // FIX: Pivot'un fiziksel olarak yukarı kaymasını engelle (Y pozisyonunu sıfırla)
+            // Kamera sadece kendi ekseninde dönsün, yukarı-aşağı hareket etmesin.
             Vector3 localPos = cameraPivotTransform.localPosition;
-            localPos.y = Mathf.Clamp(localPos.y, 0, 2.0f); 
+            // 0 yapınca ayaklara iniyordu. 1.8f ile biraz daha yukarıdan baktırıyoruz.
+            localPos.y = 1.8f; 
+            cameraPivotTransform.localPosition = localPos;
             
             // Normal moda dönerken kameranın zıplamasını önlemek için açıyı senkronize et
             lookAngle = myTransform.eulerAngles.y;
+            pivotAngle = cameraPivotTransform.localEulerAngles.x; 
         }
     }
+
+    // Sarsıntı için offset vektörü
+    private Vector3 shakeOffset = Vector3.zero;
 
     public void HandleCameraCollisions(float delta)
     {
@@ -174,7 +194,6 @@ public class CameraHandler : MonoBehaviour
         Vector3 direction = cameraTransform.position - cameraPivotTransform.position;
         direction.Normalize();
 
-        // Kamera ile oyuncu arasına engel giriyor mu kontrol et
         if (Physics.SphereCast(cameraPivotTransform.position, cameraCollisionRadius, direction, out hit, Mathf.Abs(targetPosition), collisionLayers))
         {
             float dis = Vector3.Distance(cameraPivotTransform.position, hit.point);
@@ -187,6 +206,43 @@ public class CameraHandler : MonoBehaviour
         }
 
         cameraTransformPosition.z = Mathf.Lerp(cameraTransform.localPosition.z, targetPosition, delta / 0.2f);
-        cameraTransform.localPosition = cameraTransformPosition;
+        
+        // FIX: Sarsıntıyı burada, nihai pozisyona ekliyoruz.
+        // Shake fonksiyonu sadece shakeOffset'i güncelleyecek.
+        cameraTransform.localPosition = cameraTransformPosition + shakeOffset;
+    }
+
+    // --- KAMERA SARSINTISI ---
+    public void ShakeCamera(float duration, float magnitude)
+    {
+        StopAllCoroutines(); // Eski sarsıntı varsa durdur
+        StartCoroutine(Shake(duration, magnitude));
+    }
+
+    private System.Collections.IEnumerator Shake(float duration, float magnitude)
+    {
+        float elapsed = 0.0f;
+
+        while (elapsed < duration)
+        {
+            // İLERLEME ORANI (0'dan 1'e)
+            float percentComplete = elapsed / duration;
+            
+            // SÖNÜMLEME (DAMPER): Sarsıntı sona doğru azalsın
+            // Bu, sarsıntının "küt" diye kesilmesini önler, doğal bir darbe hissi verir.
+            float damper = 1.0f - percentComplete;
+
+            // Perlin Noise ekleyerek daha "tok" bir sallantı yapabiliriz ama şimdilik Random yeterli.
+            // Magnitude'u damper ile çarparak zamanla azaltıyoruz.
+            float x = Random.Range(-1f, 1f) * magnitude * damper;
+            float y = Random.Range(-1f, 1f) * magnitude * damper;
+            
+            shakeOffset = new Vector3(x, y, 0);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        shakeOffset = Vector3.zero; // Sarsıntı bitince sıfırla
     }
 }

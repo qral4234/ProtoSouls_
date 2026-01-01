@@ -74,10 +74,19 @@ public class PlayerRageManager : MonoBehaviour
         }
     }
 
+    private ParticleSystem rageParticles;
+
     public void ActivateRage()
     {
         isRageActive = true;
         animatorHandler.PlayTargetAnimation("Rage_Activate", true);
+
+        // Görsel Efekti Başlat
+        if (rageParticles == null)
+        {
+            SetupRageParticles();
+        }
+        rageParticles.Play();
     }
 
     public void DeactivateRage()
@@ -90,6 +99,52 @@ public class PlayerRageManager : MonoBehaviour
 
         usageStack++;
         cooldownTimer = cooldownDuration;
+
+        // Görsel Efekti Durdur
+        if (rageParticles != null)
+        {
+            rageParticles.Stop();
+        }
+    }
+
+    private void SetupRageParticles()
+    {
+        GameObject go = new GameObject("Rage_VFX");
+        go.transform.parent = transform; // Karaktere yapışsın
+        go.transform.localPosition = Vector3.up * 1.0f; // Gövde ortası
+
+        rageParticles = go.AddComponent<ParticleSystem>();
+        
+        // Önce durdur, ayarla
+        rageParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = rageParticles.main;
+        main.loop = true; // Sürekli aksın
+        main.startLifetime = 1.0f;
+        main.startSpeed = 0.5f;
+        main.startSize = 0.1f;
+        main.startColor = Color.red; // Kırmızı ışıklar
+        main.simulationSpace = ParticleSystemSimulationSpace.Local; // Karakterle hareket etsin
+
+        var emission = rageParticles.emission;
+        emission.rateOverTime = 20; // Saniyede 20 tane
+
+        var shape = rageParticles.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.8f; // Karakterin çevresinde
+
+        var vel = rageParticles.velocityOverLifetime;
+        vel.enabled = true;
+        vel.y = new ParticleSystem.MinMaxCurve(0.2f, 1.0f); // Hafif yukarı çıksınlar
+        vel.x = new ParticleSystem.MinMaxCurve(-0.2f, 0.2f);
+        vel.z = new ParticleSystem.MinMaxCurve(-0.2f, 0.2f);
+
+        // Materyal (Mor kare olmasın)
+        ParticleSystemRenderer psr = go.GetComponent<ParticleSystemRenderer>();
+        if (psr != null)
+        {
+            psr.material = new Material(Shader.Find("Sprites/Default"));
+        }
     }
 
     public void AddRage(float amount)
