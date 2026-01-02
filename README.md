@@ -1,4 +1,3 @@
-=======
 # 🏆 Assets & Credits
 
 This project uses high-quality third-party assets for educational and prototyping purposes. Special thanks to the creators and platforms below.
@@ -14,6 +13,5 @@ This project uses high-quality third-party assets for educational and prototypin
 
 ## Tools & Technologies
 
->>>>>>> 0380c93255e400eef79df3d1ff09b1194693561c
 * **Engine:** Unity 3D
 * **Language:** C#
