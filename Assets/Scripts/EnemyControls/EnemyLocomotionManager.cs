@@ -3,8 +3,6 @@ using UnityEngine;
 public class EnemyLocomotionManager : MonoBehaviour
 {
     Rigidbody enemyRigidbody;
-    
-    // Dependencies
     EnemyManager enemyManager;
 
     private void Awake()
@@ -13,17 +11,18 @@ public class EnemyLocomotionManager : MonoBehaviour
         enemyRigidbody = GetComponent<Rigidbody>();
     }
 
+    /// <summary>
+    /// Düşmana fiziksel geri tepme (Knockback) uygular.
+    /// </summary>
     public void ApplyKnockback(Vector3 direction, float force)
     {
         if (enemyRigidbody == null) return;
 
         direction.Normalize();
-        direction.y = 0; // Keep horizontal
+        direction.y = 0; // Havaya uçmasın, sadece geriye gitsin
 
-        // Ensure physics can move the enemy
-        enemyRigidbody.isKinematic = false; 
+        enemyRigidbody.isKinematic = false; // Fiziği aç
 
-        // Apply impulse
         enemyRigidbody.AddForce(direction * force, ForceMode.Impulse);
     }
 }

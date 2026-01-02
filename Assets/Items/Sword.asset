@@ -19,3 +19,6 @@ MonoBehaviour:
   OH_Light_Attack_1: Light_Attack_1
   OH_Light_Attack_2: Light_Attack_2
   OH_Light_Attack_3: Light_Attack_3
+  hitSound1: {fileID: 8300000, guid: 140b3a9bb2f9e3442829dff12094437f, type: 3}
+  hitSound2: {fileID: 8300000, guid: 7c90f4c44e0e65a4e8fe8ce80fd05656, type: 3}
+  hitSound3: {fileID: 8300000, guid: e8b20019600def2479f09bf3ce44ff50, type: 3}

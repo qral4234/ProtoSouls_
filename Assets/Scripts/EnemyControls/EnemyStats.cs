@@ -4,8 +4,11 @@ public class EnemyStats : CharacterStats
 {
     Animator animator;
     EnemyLocomotionManager enemyLocomotionManager;
-    EnemyManager enemyManager; // Referans eklendi
+    EnemyManager enemyManager; 
+
+    // Geri bildirimler (Hit Feedback)
     EnemyHitFeedback hitFeedback;
+    BloodExplosionEffect bloodExplosionEffect;
 
     private void Awake()
     {
@@ -15,11 +18,15 @@ public class EnemyStats : CharacterStats
             animator = GetComponent<Animator>();
         }
         enemyLocomotionManager = GetComponent<EnemyLocomotionManager>();
-        enemyManager = GetComponent<EnemyManager>(); // Referansı bul
+        enemyManager = GetComponent<EnemyManager>(); 
+
         hitFeedback = GetComponent<EnemyHitFeedback>();
+        bloodExplosionEffect = GetComponent<BloodExplosionEffect>();
+        if(bloodExplosionEffect == null)
+            bloodExplosionEffect = gameObject.AddComponent<BloodExplosionEffect>(); 
     }
 
-    public BossHealthBar bossHealthBar;
+    public BossHealthBar bossHealthBar; // Eğer boss ise can barı
 
     public override void Start()
     {
@@ -30,13 +37,13 @@ public class EnemyStats : CharacterStats
         }
     }
 
-    [Header("Combat Reaction")]
-    public int hitCount = 0; // Vuruş sayacı
-    public GameObject shockwavePrefab; // Kırmızı Halka Efekti
+    [Header("Combat Reaction (Savaş Tepkileri)")]
+    public int hitCount = 0; // Kaç kere vuruldu? (Kombo kırmak için)
+    public GameObject shockwavePrefab; // Geri itme efekti
 
-    public override void TakeDamage(int damage, float poiseDamage, float knockbackForce, string damageAnimation = "Damage", Transform damageSource = null)
+    // Hasar Alma Fonksiyonu (CharacterStats'tan override)
+    public override void TakeDamage(int damage, float poiseDamage, float knockbackForce, string damageAnimation = "Damage", Transform damageSource = null, Vector3 hitPoint = default)
     {
-        // 1. Can Azaltma (Animasyonsuz)
         currentHealth -= damage;
 
         if (bossHealthBar != null)
@@ -44,54 +51,49 @@ public class EnemyStats : CharacterStats
             bossHealthBar.SetCurrentHealth(currentHealth);
         }
 
-        // FIX: Biz vururken o da anında vuruşa (saldırı animasyonuna) girmesin.
-        // Her hasar aldığında saldırısını biraz erteleyelim (Baskı kurma mekaniği)
+        // Hasar alınca bekleme süresini sıfırlama (Agresifleşsin mi?)
         if (enemyManager != null)
         {
-            enemyManager.currentRecoveryTime += 0f; // Artık hasar alınca duraksamıyor
+            enemyManager.currentRecoveryTime += 0f; 
         }
 
         // Ölüm Kontrolü
         if (currentHealth <= 0)
         {
             currentHealth = 0;
-            HandleDeath(); // base.HandleDeath yerine direkt override edileni çağır
+            HandleDeath(); 
             return;
         }
 
-        // 2. Vuruş Sayacı Mantığı
+        // --- HİSSEDİLEBİLİRLİK (JUICE) ---
         hitCount++;
 
+        // Her 2 vuruşta bir oyuncuyu geri it (Boss mekaniği)
         if (hitCount >= 2)
         {
-            // --- MİSİLLEME ZAMANI (RETALIATION) ---
-            hitCount = 0; // Sayacı sıfırla
-
-            // A. Şok Dalgası Efektini Yarat
+            hitCount = 0; 
             CreateShockwaveEffect();
-
-            // B. Player'ı İttir (Alana Hasar/Kuvvet Uygula)
             PushPlayerBack();
         }
         else
         {
-            // --- NORMAL VURUŞ (SADECE SES/FLASH) ---
-            // Animasyon oynatma! (User isteği: "vuruş animasyonuna girmesin")
+            // Normal hasar tepkisi (Parlamak vb.)
             if (hitFeedback != null)
             {
-                hitFeedback.PlayHitFeedback(); // Sadece materyal parlasın
+                hitFeedback.PlayHitFeedback();
             }
         }
     }
 
+    // Kırmızı şok dalgası yarat
     private void CreateShockwaveEffect()
     {
-        // Eğer prefab atanmadıysa çalışma anında oluştur (Senin için kolaylık olsun diye)
         if (shockwavePrefab == null)
         {
+            // Prefab yoksa kodla geçici oluştur (Backup)
             GameObject go = new GameObject("RedShockwave");
-            go.transform.position = transform.position + Vector3.up * 0.5f; // Yerden biraz yukarıda
-            go.AddComponent<RedShockwaveVisuals>(); // Az önce yazdığımız script
+            go.transform.position = transform.position + Vector3.up * 0.5f; 
+            go.AddComponent<RedShockwaveVisuals>(); // Eğer varsa
         }
         else
         {
@@ -99,38 +101,35 @@ public class EnemyStats : CharacterStats
         }
     }
 
+    // Oyuncuyu it (Alan hasarı olmadan sadece fiziksel itme)
     private void PushPlayerBack()
     {
-        // Etrafındaki 5 metredeki her şeyi al
         Collider[] colliders = Physics.OverlapSphere(transform.position, 5f);
 
         foreach (Collider col in colliders)
         {
             if (col.CompareTag("Player"))
             {
-                // Player'ı bulduk, itelim
                 PlayerLocomotion playerLocomotion = col.GetComponent<PlayerLocomotion>();
                 if (playerLocomotion != null)
                 {
-                    // Düşmandan Player'a doğru olan yönü bul
                     Vector3 pushDir = (col.transform.position - transform.position).normalized;
-                    pushDir.y = 0.2f; // Hafif yukarı kaldırsın
+                    pushDir.y = 0.2f; // Hafif yukarı kaldır
 
-                    // Kuvvetli bir itiş (Güç arttırıldı: 100 -> 200)
                     playerLocomotion.ApplyKnockback(pushDir, 200f);
                 }
             }
         }
     }
 
+    // Ölüm Fonksiyonu
     public override void HandleDeath()
     {
         currentHealth = 0;
         if (animator != null)
         {
-            isDead = true; // Base class değişkenini güncelle
-            animator.SetBool("isDead", true);
-            animator.Play("Death_01"); // Varsayılan ölüm animasyonu
+            isDead = true; 
+            animator.SetBool("isDead", true); // Ölüm animasyonu
         }
 
         // Fizikleri kapat
@@ -146,8 +145,20 @@ public class EnemyStats : CharacterStats
             collider.enabled = false;
         }
 
-        // FIX: Ölünce AI'yı tamamen sustur
+        // AI'yı kapat
         if(enemyLocomotionManager != null) enemyLocomotionManager.enabled = false;
         if(enemyManager != null) enemyManager.enabled = false;
+        
+        // Kan efekti patlat
+        if(bloodExplosionEffect != null)
+        {
+            bloodExplosionEffect.Explode();
+        }
+
+        // Oyunu Kazandın!
+        if(GameUIManager.instance != null)
+        {
+            GameUIManager.instance.TriggerWinGame();
+        }
     }
 }

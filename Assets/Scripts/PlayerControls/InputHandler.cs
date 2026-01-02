@@ -38,14 +38,17 @@ public class InputHandler : MonoBehaviour
     [Tooltip("Yuvarlanma ile koşma arasındaki farkı anlamak için zamanlayıcı.")]
     public float rollInputTimer;
 
+    // Yeni Input Sistemi referansı (Generated C# class)
     PlayerControls inputActions;
 
+    // Script aktif olduğunda (OnEnable), input sistemini kurar
     public void OnEnable()
     {
         if (inputActions == null)
         {
             inputActions = new PlayerControls();
 
+            // Hareket (WASD) okuma
             inputActions.Player.Move.performed += inputActions => 
             {
                 Vector2 input = inputActions.ReadValue<Vector2>();
@@ -58,6 +61,7 @@ public class InputHandler : MonoBehaviour
                 vertical = 0;
             };
 
+            // Kamera (Fare) okuma
             inputActions.Player.Look.performed += inputActions => 
             {
                 Vector2 input = inputActions.ReadValue<Vector2>();
@@ -74,25 +78,28 @@ public class InputHandler : MonoBehaviour
         inputActions.Enable();
     }
 
+    // Script pasif olduğunda input sistemini de kapatır
     private void OnDisable()
     {
         inputActions.Disable();
     }
 
+    // Her karede çalışarak anlık tuş vuruşlarını dinler
     public void TickInput(float delta)
     {
-        // Hareketi oku ve işle
+        // 0-1 arası hareket büyüklüğünü hesapla
         moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
         mouseX = Input.GetAxis("Mouse X");
         mouseY = Input.GetAxis("Mouse Y");
 
-        // Sprint ve Roll (Shift) mantığı
+        // Shift tuşu kontrolü (Koşma/Yuvarlanma)
         b_Input = Input.GetKey(KeyCode.LeftShift);
 
+        // Shift basılı tutuluyorsa (Koşma)
         if (b_Input)
         {
             rollInputTimer += delta;
-            // Tuşa basılı tutuluyorsa koşma moduna geç
+            // 0.22 saniyeden uzun basılırsa koşma olarak algıla
             if (rollInputTimer > 0.22f)
             {
                 sprintFlag = true;
@@ -100,28 +107,26 @@ public class InputHandler : MonoBehaviour
         }
         else
         {
+            // Tuş bırakıldıysa koşmayı durdur
             if (sprintFlag)
-                sprintFlag = false;
-        }
-
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            // Eğer kısa basılıp çekildiyse yuvarlan
-            if (rollInputTimer < 0.22f)
             {
                 sprintFlag = false;
-                rollFlag = true;
             }
-            
             rollInputTimer = 0;
         }
 
-        // Saldırı ve Blok girdileri
-        rb_Input = Input.GetMouseButtonDown(0);
-        blockingInput = Input.GetMouseButton(1);
-        lockOn_Input = Input.GetMouseButtonDown(2); // Lock-On GERİ GELDİ
+        // Space tuşu ile Yuvarlanma
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+             rollFlag = true;
+        }
+
+        // Fare Tıklamaları
+        rb_Input = Input.GetMouseButtonDown(0); // Sol Tık (Saldırı)
+        blockingInput = Input.GetMouseButton(1); // Sağ Tık (Blok)
+        lockOn_Input = Input.GetMouseButtonDown(2); // Orta Tuş (Kilitlenme)
         
-        // İYİLEŞTİRME GİRDİSİ (Q Tuşu)
-        heal_Input = Input.GetKeyDown(KeyCode.Q);
+        // Klavye Kısayolları
+        heal_Input = Input.GetKeyDown(KeyCode.Q); // Can Basma
     }
 }

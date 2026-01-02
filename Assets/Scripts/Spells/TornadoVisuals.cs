@@ -21,7 +21,8 @@ public class TornadoVisuals : MonoBehaviour
         // --- FIX 2: Daha İyi Saydamlık (Alpha Blended) ---
         // "Mobile/Particles/Alpha Blended" shader'ı varsayılan olarak en iyi saydamlığı verir
         // ve texture olmasa bile yumuşak gözükür.
-        Material defaultMat = new Material(Shader.Find("Mobile/Particles/Alpha Blended")); 
+        // FIX: "Sprites/Default" buildde kesinlikle bulunur. Görünmezlik sorununu çözer.
+        Material defaultMat = new Material(Shader.Find("Sprites/Default")); 
         if(defaultMat != null)
         {
             psRenderer.material = defaultMat;
@@ -42,7 +43,9 @@ public class TornadoVisuals : MonoBehaviour
         main.startSize = new ParticleSystem.MinMaxCurve(1f, 2.5f); 
         // Alpha: 0.05 -> 0.3 (Daha görünür)
         // Renk: Hafif mavi/turkuaz (Magical Air)
-        main.startColor = new Color(0.8f, 0.9f, 1.0f, 0.15f); 
+        // Alpha: 0.15 çok düşüktü, 0.6 yapıyoruz ki net görülsün
+        // Eğer shader opaque ise Solid renk olacak ama en azından görünecek.
+        main.startColor = new Color(0.6f, 0.8f, 1.0f, 0.6f); 
         main.simulationSpace = ParticleSystemSimulationSpace.World;
         main.maxParticles = 300; 
 
@@ -80,8 +83,8 @@ public class TornadoVisuals : MonoBehaviour
         Gradient gradient = new Gradient();
         gradient.SetKeys(
             new GradientColorKey[] { new GradientColorKey(new Color(0.7f, 0.9f, 1f), 0.0f), new GradientColorKey(Color.white, 1.0f) },
-            // Alpha Grafiği: Başta silik -> Ortada çok net (%40) -> Sonra silik
-            new GradientAlphaKey[] { new GradientAlphaKey(0f, 0.0f), new GradientAlphaKey(0.4f, 0.2f), new GradientAlphaKey(0f, 1.0f) }
+            // Alpha Grafiği: Daha net görünürlük için %40 yerine %80 yapıldı
+            new GradientAlphaKey[] { new GradientAlphaKey(0.2f, 0.0f), new GradientAlphaKey(0.8f, 0.5f), new GradientAlphaKey(0f, 1.0f) }
         );
         colorOverLifetime.color = gradient;
         

@@ -18,8 +18,15 @@ public class RedShockwaveVisuals : MonoBehaviour
         
         // --- Material Setup ---
         // Alpha Blended shader kullanarak net ve şeffaf bir görünüm elde edelim
-        Material defaultMat = new Material(Shader.Find("Mobile/Particles/Alpha Blended"));
-        if(defaultMat != null) psRenderer.material = defaultMat;
+        // FIX: "Particles/Standard Unlit" da buildde olmayabilir. 
+        // "Sprites/Default" her Unity buildinde %100 vardır.
+        Material defaultMat = new Material(Shader.Find("Sprites/Default"));
+        
+        // Eğer materyal oluştuysa ata
+        if(defaultMat != null) 
+        {
+            psRenderer.material = defaultMat;
+        }
 
         var main = ps.main;
         var shape = ps.shape;
@@ -33,7 +40,7 @@ public class RedShockwaveVisuals : MonoBehaviour
         main.startLifetime = 0.5f; // Yarım saniyede yok olsun (Hızlı tepki)
         main.startSpeed = 15f; // Dışarı doğru çok hızlı fırlasın
         main.startSize = 0.5f;
-        main.startColor = new Color(1f, 0.1f, 0.1f, 0.8f); // Koyu Kırmızı
+        main.startColor = new Color(1f, 0.2f, 0.2f, 1f); // Tam Opak (Net görülsün diye)
         main.simulationSpace = ParticleSystemSimulationSpace.World;
         main.playOnAwake = true;
 

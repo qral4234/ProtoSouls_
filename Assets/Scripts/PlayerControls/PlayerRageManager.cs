@@ -6,29 +6,24 @@ public class PlayerRageManager : MonoBehaviour
     AnimatorHandler animatorHandler;
 
     [Header("UI")]
-    public RageBar rageBar;
+    public RageBar rageBar; // Öfke barı görseli
 
-    [Header("Rage Stats")]
+    [Header("Öfke İstatistikleri")]
     public float maxRage = 100;
     public float currentRage = 0;
-    public bool isRageActive = false;
-    public float damageMultiplier = 1.5f;
+    public bool isRageActive = false; // Öfke modu açık mı?
+    public float damageMultiplier = 1.5f; // Öfkeliyken hasar kaç katına çıksın?
 
-    [Header("Penalty Stack")]
-    public int usageStack = 0;
-    // Stack 0: 100% Fill Rate (Normal)
-    // Stack 1: 85% Fill Rate
-    // Stack 2: 70% Fill Rate
-    // Stack 3+: 55% Fill Rate (Max penalty)
+    [Header("Ceza Sistemi (Penalty Stack)")]
+    public int usageStack = 0; // Kaç kere RAGE açtık? Her açışta dolum hızı düşer.
     
-    [Header("Cooldown")]
+    [Header("Bekleme Süresi (Cooldown)")]
     public float cooldownTimer = 0;
     public float cooldownDuration = 15f;
 
-    [Header("Drain Settings")]
-    public float sprintDrainAmount = 5f;
-    public float attackDrainAmount = 10f;
-    // Attack drain is handled via external call from PlayerAttacker
+    [Header("Harcama Ayarları")]
+    public float sprintDrainAmount = 5f; // Koşarken harcanan miktar
+    public float attackDrainAmount = 10f; // Saldırırken harcanan miktar
 
     private void Awake()
     {
@@ -38,6 +33,7 @@ public class PlayerRageManager : MonoBehaviour
 
     private void Start()
     {
+        // Barı sıfırla
         if (rageBar != null)
         {
             rageBar.SetMaxRage(maxRage);
@@ -50,10 +46,11 @@ public class PlayerRageManager : MonoBehaviour
         float delta = Time.deltaTime;
 
         HandleCooldown(delta);
-        HandleRageActivation();
-        HandleSprintDrain(delta);
+        HandleRageActivation(); // R tuşunu dinle
+        HandleSprintDrain(delta); // Koşuyorsa harca
     }
 
+    // Cooldown süresini geri sayar
     private void HandleCooldown(float delta)
     {
         if (cooldownTimer > 0)
@@ -62,9 +59,10 @@ public class PlayerRageManager : MonoBehaviour
         }
     }
 
+    // R tuşuna basınca RAGE'i aktif eder
     private void HandleRageActivation()
     {
-        // Only activate if not active, cooldown is over, and rage is full
+        // Sadece hazırsa ve doluysa
         if (!isRageActive && cooldownTimer <= 0 && currentRage >= maxRage)
         {
             if (Input.GetKeyDown(KeyCode.R))
@@ -74,21 +72,22 @@ public class PlayerRageManager : MonoBehaviour
         }
     }
 
-    private ParticleSystem rageParticles;
+    private ParticleSystem rageParticles; // Kırmızı aura efekti
 
+    // Modu aç
     public void ActivateRage()
     {
         isRageActive = true;
-        animatorHandler.PlayTargetAnimation("Rage_Activate", true);
+        animatorHandler.PlayTargetAnimation("Rage_Activate", true); // Kükreme animasyonu
 
-        // Görsel Efekti Başlat
         if (rageParticles == null)
         {
-            SetupRageParticles();
+            SetupRageParticles(); // Eşekt yoksa oluştur
         }
         rageParticles.Play();
     }
 
+    // Modu kapat (Bittiğinde)
     public void DeactivateRage()
     {
         isRageActive = false;
@@ -97,49 +96,47 @@ public class PlayerRageManager : MonoBehaviour
         if (rageBar != null)
             rageBar.SetCurrentRage(0);
 
-        usageStack++;
-        cooldownTimer = cooldownDuration;
+        usageStack++; // Cezayı artır
+        cooldownTimer = cooldownDuration; // Cooldown başlat
 
-        // Görsel Efekti Durdur
         if (rageParticles != null)
         {
             rageParticles.Stop();
         }
     }
 
+    // Partikül efektini kod ile oluştur (Prefab gerektirmez)
     private void SetupRageParticles()
     {
         GameObject go = new GameObject("Rage_VFX");
-        go.transform.parent = transform; // Karaktere yapışsın
-        go.transform.localPosition = Vector3.up * 1.0f; // Gövde ortası
+        go.transform.parent = transform; 
+        go.transform.localPosition = Vector3.up * 1.0f; 
 
         rageParticles = go.AddComponent<ParticleSystem>();
         
-        // Önce durdur, ayarla
         rageParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
         var main = rageParticles.main;
-        main.loop = true; // Sürekli aksın
+        main.loop = true; 
         main.startLifetime = 1.0f;
         main.startSpeed = 0.5f;
         main.startSize = 0.1f;
-        main.startColor = Color.red; // Kırmızı ışıklar
-        main.simulationSpace = ParticleSystemSimulationSpace.Local; // Karakterle hareket etsin
+        main.startColor = Color.red; 
+        main.simulationSpace = ParticleSystemSimulationSpace.Local; 
 
         var emission = rageParticles.emission;
-        emission.rateOverTime = 20; // Saniyede 20 tane
+        emission.rateOverTime = 20; 
 
         var shape = rageParticles.shape;
         shape.shapeType = ParticleSystemShapeType.Sphere;
-        shape.radius = 0.8f; // Karakterin çevresinde
+        shape.radius = 0.8f; 
 
         var vel = rageParticles.velocityOverLifetime;
         vel.enabled = true;
-        vel.y = new ParticleSystem.MinMaxCurve(0.2f, 1.0f); // Hafif yukarı çıksınlar
+        vel.y = new ParticleSystem.MinMaxCurve(0.2f, 1.0f); 
         vel.x = new ParticleSystem.MinMaxCurve(-0.2f, 0.2f);
         vel.z = new ParticleSystem.MinMaxCurve(-0.2f, 0.2f);
 
-        // Materyal (Mor kare olmasın)
         ParticleSystemRenderer psr = go.GetComponent<ParticleSystemRenderer>();
         if (psr != null)
         {
@@ -147,12 +144,13 @@ public class PlayerRageManager : MonoBehaviour
         }
     }
 
+    // Öfke Kazandır
     public void AddRage(float amount)
     {
-        if (isRageActive) return;
-        if (cooldownTimer > 0) return;
+        if (isRageActive) return; // Zaten aktifse doldurma
+        if (cooldownTimer > 0) return; // Cooldown daysa doldurma
 
-        // Calculate fill rate based on stack
+        // Ceza sistemine göre dolum hızını azalt
         float fillMultiplier = 1.0f;
         if (usageStack == 1) fillMultiplier = 0.85f;
         else if (usageStack == 2) fillMultiplier = 0.70f;
@@ -167,6 +165,7 @@ public class PlayerRageManager : MonoBehaviour
             rageBar.SetCurrentRage(currentRage);
     }
 
+    // Öfke Harca
     public void DrainRage(float amount)
     {
         if (!isRageActive) return;
@@ -183,6 +182,7 @@ public class PlayerRageManager : MonoBehaviour
             rageBar.SetCurrentRage(currentRage);
     }
 
+    // Koşarken öfke harca
     private void HandleSprintDrain(float delta)
     {
         if (isRageActive && inputHandler.sprintFlag && inputHandler.moveAmount > 0.5f)
