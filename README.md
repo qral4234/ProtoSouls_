@@ -1,4 +1,3 @@
-=======
 # 🏆 Assets & Credits
 
 This project uses high-quality third-party assets for educational and prototyping purposes. Special thanks to the creators and platforms below.
@@ -12,8 +11,21 @@ This project uses high-quality third-party assets for educational and prototypin
 * **Main Player (Knight/Paladin):**
     * **Model & Animations:** [Adobe Mixamo](https://www.mixamo.com/) ("Sword and Shield" Pack).
 
+## 🔊 Audio
+
+### 🎵 Music
+* **Background Music (BGM):** [Fantasy Medieval Combat](https://assetstore.unity.com/packages/audio/music/orchestral/fantasy-medieval-combat-298404)
+    * **Source:** Unity Asset Store
+
+### ⚔️ Sound Effects (SFX)
+* **Combat & Sword Sounds:**
+    * **Source:** [Freesound.org](https://freesound.org/)
+    * **Credits:**
+        * **Heavy Attack / Swing:** [Sound 547600](https://freesound.org/people/Mateusz_Chenc/sounds/547600/) by **Mateusz_Chenc** (CC0)
+        * **Sword Impact / Hit 1:** [Sound 323526](https://freesound.org/people/Kreastricon62/sounds/323526/) by **Kreastricon62** (CC0)
+        * **Sword Impact / Hit 2:** [Sound 323525](https://freesound.org/people/Kreastricon62/sounds/323525/) by **Kreastricon62** (CC0)
+
 ## Tools & Technologies
 
->>>>>>> 0380c93255e400eef79df3d1ff09b1194693561c
 * **Engine:** Unity 3D
 * **Language:** C#
