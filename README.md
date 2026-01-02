@@ -18,12 +18,12 @@ This project uses high-quality third-party assets for educational and prototypin
     * **Source:** Unity Asset Store
 
 ### ⚔️ Sound Effects (SFX)
-* **Combat & Sword Sounds:**
+* **Combo Attack Sounds:**
     * **Source:** [Freesound.org](https://freesound.org/)
     * **Credits:**
-        * **Heavy Attack / Swing:** [Sound 547600](https://freesound.org/people/Mateusz_Chenc/sounds/547600/) by **Mateusz_Chenc** (CC0)
-        * **Sword Impact / Hit 1:** [Sound 323526](https://freesound.org/people/Kreastricon62/sounds/323526/) by **Kreastricon62** (CC0)
-        * **Sword Impact / Hit 2:** [Sound 323525](https://freesound.org/people/Kreastricon62/sounds/323525/) by **Kreastricon62** (CC0)
+        * **Combo Hit 1:** [Sound 547600](https://freesound.org/people/Mateusz_Chenc/sounds/547600/) by **Mateusz_Chenc** (CC0)
+        * **Combo Hit 2:** [Sound 323526](https://freesound.org/people/Kreastricon62/sounds/323526/) by **Kreastricon62** (CC0)
+        * **Combo Hit 3:** [Sound 323525](https://freesound.org/people/Kreastricon62/sounds/323525/) by **Kreastricon62** (CC0)
 
 ## Tools & Technologies
 
